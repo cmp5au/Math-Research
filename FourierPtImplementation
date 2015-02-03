@@ -1,0 +1,60 @@
+
+
+(*This is a modified file according to Colin's Pis2Notebook. You could set \
+the degree of the Laplician polynomial *)
+
+(*Basic set-up*)
+
+
+ClearAll[f]
+
+ClearAll[frac]
+
+xleft := Function[{f}, D[f, x] - y*D[f, z]/2];
+yleft := Function[{f}, D[f, y] + x*D[f, z]/2]; 
+xright := Function[{f}, D[f, x] + y*D[f, z]/2];
+yright := Function[{f}, D[f, y] - x*D[f, z]/2];
+
+laplsquare := Function[{f}, (xleft[f])^2 + (yleft[f])^2]
+
+(*Here is the new operator which replaces the polylapl operator*)
+fourierpt := 
+ Function[{f}, 
+  Normal[2*\[Pi]*
+    Integrate[
+     Sum[SeriesCoefficient[f, {z, 0, 2*j}]*(-1)^j*(2*j)!*
+       SeriesCoefficient[(
+        w E^((-(x^2 + y^2) w Coth[w*t/2])/4))/((8 \[Pi]^2) Sinh[w*t/2]), {w, 
+         0, 2*j}], {j, 0, 
+       Floor[Exponent[f, z]/
+         2]}], {x, -\[Infinity], \[Infinity]}, {y, -\[Infinity], \
+\[Infinity]}]]]
+
+(*Set function*)
+
+g[x_, y_, z_] = 
+ Subscript[a, 200] x^2 + Subscript[a, 020] y^2 + Subscript[a, 002] z^2 + 
+  Subscript[a, 110] x*y + Subscript[a, 101] x*z + Subscript[a, 011] y*z + 
+  Subscript[a, 100] x + Subscript[a, 010] y + Subscript[a, 001] z(* + 
+  Subscript[a, 300] x^3 + Subscript[a, 030] y^3 + Subscript[a, 003] z^3 + 
+  Subscript[a, 120] x*y^2 + Subscript[a, 102] x*z^2 + 
+  Subscript[a, 210] x^2*y + Subscript[a, 201] x^2*z + 
+  Subscript[a, 021] y^2*z + Subscript[a, 012] y*z^2 + 
+  Subscript[a, 111] x*y*z +Subscript[a, 400]x^4+Subscript[a, 310]x^3*y+
+   Subscript[a, 301]x^3*z+Subscript[a, 220]x^2*y^2+Subscript[a, 202]x^2*z^2+
+   Subscript[a, 130]x*y^3+Subscript[a, 103]x*z^3+Subscript[a, 040]y^4+
+   Subscript[a, 031]y^3*z+Subscript[a, 022]y^2*z^2+Subscript[a, 013]y*z^3+
+   Subscript[a, 004]z^4+Subscript[a, 211]x^2*y*z+Subscript[a, 121]x*y^2*z+
+   Subscript[a, 112]x*y*z^2 *)
+
+(*The numerator*)
+numerator[t_] = (fourierpt[xright[g[x, y, z]]])^2 + (fourierpt[
+    yright[g[x, y, z]]])^2
+
+(*The denominator*)
+denominator[t_] = fourierpt[laplsquare[g[x, y, z]]]
+
+(*The fraction*)
+frac[t_] = 
+ Simplify[((fourierpt[xright[g[x, y, z]]])^2 + (fourierpt[
+       yright[g[x, y, z]]])^2)/(fourierpt[laplsquare[g[x, y, z]]])]
